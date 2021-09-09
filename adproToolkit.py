@@ -335,7 +335,7 @@ class arraySearchReplace():
 class openAdproFile():
 
     def __init__(self, filePath,searchFor,replaceWith):
-        print("Productivity Suite Toolkit Rev 0 by Strantor 8/2/2021\n\n")
+        print("\n\nProductivity Suite Toolkit Rev 0 by Strantor 8/2/2021\n\n")
         self.searchFor = searchFor
         self.replaceWith = replaceWith
         self.filePath = filePath
@@ -380,17 +380,18 @@ class openAdproFile():
             root = tree.getroot()
             progName = root.find('pgmName').text
             result["name"] = progName
+            result["taskFileName"] = task
             #print(progName)
             results[str(resultNo)] = result
-        #print(results)
+        #print(unNestDict(results))
         self.taskSearchResults = results
         self.listTasks()
 
     def listTasks(self):
 
-        table = [['Result #','Task Name']]
+        table = [['Result #','Task Name','File Name']]
         for k,v in self.taskSearchResults.items():
-            row = [str(k),v['name']]
+            row = [str(k),v['name'],v["taskFileName"]]
             table.append(row)
         print(tabulate(table, tablefmt="grid"))
         response = input("How to proceed? \n'A' = Search/Replace tags in ALL tasks in the above table\n"
@@ -456,30 +457,32 @@ class openAdproFile():
     def rePackAdpro(self):
         path = self.folder
         fileChoice = input("Create new file ('N') or overwrite original file ('O')?")
-        if fileChoice in ['O','o']:
-            newFileName = self.filePath
-        else:
-            newFileName = self.projectfolder + self.fileName.split('.adpro')[0]+"_Mod.adpro"
-        zipf = zipfile.ZipFile(newFileName, 'w', zipfile.ZIP_DEFLATED)
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                zipf.write(
-                    os.path.join(root, file),
-                    os.path.relpath(os.path.join(root, file),
-                                    os.path.join(path, '....')))
-        zipf.close()
-        try:
-            shutil.rmtree(self.folder)
-        except OSError as e:
-            print ("Error: %s - %s." % (e.filename, e.strerror))
+        if fileChoice in ['O','o','n','N']:
+            if fileChoice in ['O','o']:
+                newFileName = self.filePath
+            elif fileChoice in ['n','N']:
+                newFileName = self.projectfolder + self.fileName.split('.adpro')[0]+"_Mod.adpro"
+
+            zipf = zipfile.ZipFile(newFileName, 'w', zipfile.ZIP_DEFLATED)
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    zipf.write(
+                        os.path.join(root, file),
+                        os.path.relpath(os.path.join(root, file),
+                                        os.path.join(path, '....')))
+            zipf.close()
+            try:
+                shutil.rmtree(self.folder)
+            except OSError as e:
+                print ("Error: %s - %s." % (e.filename, e.strerror))
 
 
 
 if __name__ == "__main__":
     #myProject = openAdproFile("Z:\\G\\PSuite Project Python\\New folder (3)\\Conv1-4.2.zip")
-    searchfor = "Conveyor(1)"
-    replacewith = "Conveyor(2)"
-    pathToProject = "Z:\\G\\PSuite Project Python\\New folder (3)\\Conv1-4.2.adpro"
+    searchfor = "Conveyor(7)"
+    replacewith = "Conveyor(1)"
+    pathToProject = "sample1.adpro"
     myProject = openAdproFile(pathToProject,searchfor,replacewith)
 
 
