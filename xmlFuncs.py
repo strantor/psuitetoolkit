@@ -9,14 +9,15 @@ import re
 class openAdproFile():
 
     def __init__(self, filePath):
-        print("\n\nProductivity Suite Toolkit Rev 0 by Strantor 8/2/2021\n\n")
+        #print("\n\nProductivity Suite Toolkit Rev 0 by Strantor 8/2/2021\n\n")
         self.filePath = filePath
-        self.fileName = self.filePath.split('\\')[-1]
+        self.fileName = self.filePath.split('/')[-1]
         L,R = filePath.split(".adpro")
-        L2 = L.split('\\')
+        #L2 = L.split('\\')
+        L2 = L.split('/')
         self.projectfolder = L.rstrip(L2[-1])
-        self.folder = L +"_Extract\\"
-        self.rllPath = self.folder + "task\\"
+        self.folder = L +"_Extract/"
+        self.rllPath = self.folder + "task/"
 
         print("unpacking adpro contents of",self.fileName,"to", self.folder)
         zf = zipfile.ZipFile(self.filePath)
@@ -25,12 +26,26 @@ class openAdproFile():
         self.content = adcXML(self.folder)
 
 
-    def rePackAdpro(self,cleanup=False):
+    def rePackAdpro(self,saveAs=None, cleanup=False):
+        """
+        if saveAs == None:
+            path = self.folder
+            newFileName = self.projectfolder + self.fileName.split('.adpro')[0]+"_Mod.adpro"
+        else:
+            newFileName = saveAs.split('/')[-1]
+            L,R = saveAs.split(".adpro")
+            L2 = L.split('/')
+            path = L.rstrip(L2[-1])
+        """
         path = self.folder
-        newFileName = self.projectfolder + self.fileName.split('.adpro')[0]+"_Mod.adpro"
+        if saveAs == None:
+            newFileName = self.projectfolder + self.fileName.split('.adpro')[0]+"_Mod.adpro"
+        else:
+            newFileName = saveAs
+        print("path: ",path,", newFileName: ",newFileName)
 
         zipf = zipfile.ZipFile(newFileName, 'w', zipfile.ZIP_DEFLATED)
-        for root, dirs, files in os.walk(path):
+        for root, dirs, files in os.walk(path):#os.walk(path):
             for file in files:
                 zipf.write(
                     os.path.join(root, file),
@@ -58,7 +73,7 @@ class adcXML():
         self.tagsRoot = self.tagsTree.getroot()
 
     def getTasks(self,path):
-        path = path + "task\\"
+        path = path + "task/"
         print("searching tasks...")
         resultNo = 0
         tasks = os.listdir(path)
@@ -168,10 +183,15 @@ class adcXML():
             program.append(newRung)
         return lastRung
 
-    def incrementalRungCopy(self,file, firstRungNo,howMany):
-        failedOnce = False
-        workedBeforeThat = ""
-        lastThatWorked = ""
+    def searchRungsForDisplay(self,file):
+        rungs = file["xml"].findall('rungs')
+        rungDataList = []
+        for rung in rungs:
+            thisRung = self.searchRLLelement(rung,None)
+            rungDataList.append(thisRung)
+        return rungDataList
+
+    def sequentialRungCopy(self, file, firstRungNo, howMany):
         firstRungNo = str(firstRungNo-1)
         file = file["xml"]
         newFirstRungNo = self.copyRung(file,firstRungNo)
@@ -534,7 +554,6 @@ class adcXML():
     def identifyTag(self,tree, tag):
         result = {}
         try:
-            # TODO: further nest this inside self.getAncestor(tree,tag,'baseTagRef') to get bit of word tags
             # this will throw an exception if 'arrayTagRef' is not found higher up in the tree,
             # which means this is not an array tag
             parentDataTag = self.getAncestor(tree,tag,'arrayTagRef')
@@ -551,6 +570,7 @@ class adcXML():
                 result["tag"] = tag
                 result["tagXML_ID"] = tag.get('my_ID')
                 result["tagName"] = tag.find("./baseTagRef/data/arrayTagRef/data/name").text
+                result["tagID"] = tag.find("./baseTagRef/data/arrayTagRef/data/ID").text
                 result["array"] = {}
                 result["array"]["col"] = tag.find('./baseTagRef/data/colTagRef/data/constValue/value').text
                 result["BOW"] = {}
@@ -585,6 +605,7 @@ class adcXML():
                 tag = tree.find(".//"+parentDataTag.tag+'[@my_ID="'+parentDataTag.attrib["my_ID"]+'"]...')
                 result["tagXML_ID"] = tag.get('my_ID')
                 result["tagName"] = tag.find("./baseTagRef/data/name").text
+
                 result["tagID"] = tag.find("./baseTagRef/data/ID").text
                 result["BOW"] = {}
                 result["BOW"]["bit"] = tag.find('./indexTagRef/data/constValue/value').text
@@ -633,13 +654,15 @@ class adcXML():
         return results
 
     def saveRLL(self,path,data):
+        print("saveRLL",path,data)
         root = data.getroot()
         root.set("xmlns:xs","http://www.w3.org/2001/XMLSchema")
         data.write(path)
 
 
 def main():
-    project = openAdproFile("sample1.adpro")
+    #project = openAdproFile("sample1.adpro")
+    project = openAdproFile("Z:/PSuite Project Python/sample1.adpro")
     c = project.content
 
     #c.searchTags("MultiDim Array")
@@ -647,7 +670,11 @@ def main():
     searchResults = c.searchAllRLLfiles("DI-0.1.1.2")
     #print(c.unNestDict(searchResults))
     #c.copyRung(c.tasks[0],1)
-    c.incrementalRungCopy(c.tasks[0],1,20)
+    sresults = c.searchRungsForDisplay(c.tasks[0])
+    #for result in sresults:
+    #    print(c.unNestDict(result))
+    c.sequentialRungCopy(c.tasks[0], 1, 3)
+
     #c.searchTags("MultiDim Array")
 
     #searchResults = c.searchRLL("Array Bit")
