@@ -192,6 +192,7 @@ class adcXML():
         return rungDataList
 
     def sequentialRungCopy(self, file, firstRungNo, howMany):
+        ret = ""
         firstRungNo = str(firstRungNo-1)
         file = file["xml"]
         newFirstRungNo = self.copyRung(file,firstRungNo)
@@ -253,6 +254,7 @@ class adcXML():
         except KeyError as e:
             rung,col = str(e).strip("'").split("_")
             self.statusOutput("rungs not equivalent! Check Rung " + rung + ", column " + col + ".")
+            ret = "rungs not equivalent! Check Rung " + rung + ", column " + col + "."
 
 
         newTags = {}
@@ -356,6 +358,10 @@ class adcXML():
                                         failedOnce = True
                                 """
         self.tagsTree.write(self.folder + "program.tag")
+        if ret == "":
+            ret = "Successfully copied " + str(howMany) + "rungs. (appended to end of file)"
+        return ret
+
 
     def searchTags(self, searchFor):
         for item in self.tagsRoot.iter("item"):

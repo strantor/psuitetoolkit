@@ -80,7 +80,7 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
         self.lineEdit_2.textChanged.connect(self.evalSavePath)
         self.pushButton_5.setEnabled(False)
         self.pushButton_5.clicked.connect(self.saveFile)
-        self.pushButton_3.setEnabled(False)
+        #self.pushButton_3.setEnabled(False)
         self.pushButton_2.clicked.connect(self.startSeqRungCopy)
         self.treeWidget_4.clicked.connect(self.evalRungCopyDisplay)
         self.treeWidget_4.setColumnCount(11)
@@ -114,12 +114,12 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
 
     def startSeqRungCopy(self):
         try:
-            print("")
             if self.rungCopySelected != None and self.taskForCopy != None:
                 numcopies = int(self.lineEdit_4.text())
                 task = self.c.tasks[int(self.taskForCopy)]
-                print(task, self.rungCopySelected, numcopies)
-                self.c.sequentialRungCopy(task, int(self.rungCopySelected), numcopies)
+                #print(task, self.rungCopySelected, numcopies)
+                fb = self.c.sequentialRungCopy(task, int(self.rungCopySelected), numcopies)
+                self.appendStatus(fb)
         except Exception as e:
             print(e)
             #self.appendStatus(e)
