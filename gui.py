@@ -9,6 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QTreeWidgetItem, QTreeWidget, QTreeView, QWidget, QVBoxLayout, QFileSystemModel
 import xml.etree.ElementTree as et
 import xmlFuncs
+import traceback
 
 class importedGUI(QtWidgets.QMainWindow):#, myGUI):
     def __init__(self, *args, **kwargs):
@@ -109,8 +110,8 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                 self.c.saveRLL(self.c.tasks[i]["path"],self.c.tasks[i]["xml"])
             self.c.tagsTree.write(self.c.folder + "program.tag")
             self.project.rePackAdpro(cleanup=False, saveAs=self.lineEdit_2.text())
-        except Exception as e:
-            print(e)
+        except:
+            self.outputError()
 
     def startSeqRungCopy(self):
         try:
@@ -120,9 +121,18 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                 #print(task, self.rungCopySelected, numcopies)
                 fb = self.c.sequentialRungCopy(task, int(self.rungCopySelected), numcopies)
                 self.appendStatus(fb)
-        except Exception as e:
-            print(e)
-            #self.appendStatus(e)
+        except:
+            self.outputError()
+
+    def outputError(self):
+        a,b,c = sys.exc_info()
+        er = traceback.format_exception(a,b,c)
+        erTxt = ""
+        for line in er:
+            erTxt += line
+        print(erTxt)
+        self.appendStatus(erTxt)
+
 
     def evalRungCopyNoTxt(self):
         def is_integer(n):
@@ -175,8 +185,8 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                         if rungItem.text(0) != self.lastCopyRung:
                             rungItem.setCheckState(0,False)
             self.evalRungCopyNoTxt()
-        except Exception as e:
-            print(e)
+        except:
+            self.outputError()
 
 
 
@@ -196,10 +206,12 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                 task = item.data(Qt.DisplayRole)
                 for i in range(0,len(self.c.tasks)):
                     if self.c.tasks[i]['name'] == task:
-                        print(self.c.tasks[i]["taskFileName"])
+                        #print(self.c.tasks[i]["taskFileName"])
                         self.populateRungCopyTree(i)
-        except Exception as e:
-            print(e)
+                        #print(type(self.c.tasks[i]["xml"]))
+                        self.printTree(self.c.tasks[i]["xml"].getroot(),self.treeWidget_3)#treeWidget_3
+        except:
+            self.outputError()
 
     def populateTaskList(self):
         self.taskForCopy = None
@@ -207,8 +219,8 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
         self.treeWidget_4.clear()
         try:
             self.c.getTasks(self.c.folder)
-        except Exception as e:
-            print(e)
+        except:
+            self.outputError()
         for task in self.c.tasks:
             branch = QTreeWidgetItem([task['name'],task["taskFileName"]])
             self.treeWidget_5.addTopLevelItem(branch)
@@ -321,8 +333,8 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                                 #branch = QTreeWidgetItem([child.tag,txt,str(child.attrib)])
                                 a.addChild(branch)
                     """
-                    except Exception as e:
-                        print(e)
+                    except:
+                        self.outputError()
             displaytree(a,tree)
 
     def setSaveLocation(self):
@@ -413,6 +425,7 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
             #self.tabWidget.insertTab(0,self.tab_6,self.tab6Text)
             self.tabWidget.setCurrentIndex(2)
             self.populateTaskList()
+            self.printTree(self.c.tagsRoot,self.treeWidget)
 
 
 
@@ -499,8 +512,10 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
 
 
 
-    def printTree(self,s,whichWidget):
-        tree = et.fromstring(s)
+    def printTree(self,s,whichWidget):#treeWidget_3
+
+        #tree = et.fromstring(s)
+        tree = s
         a=QTreeWidgetItem([tree.tag,tree.text,str(tree.attrib)])
         whichWidget.addTopLevelItem(a)
         def displaytree(a,s):
@@ -513,8 +528,8 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                     branch = QTreeWidgetItem([child.tag,txt,str(child.attrib)])
                     a.addChild(branch)
                     displaytree(branch,child)
-                except Exception as e:
-                    print(e)
+                except:
+                    self.outputError()
         displaytree(a,tree)
 
     def printTree2(self,s,whichWidget):
@@ -532,8 +547,8 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
                     if "unique_ID" in child.attrib:
                         a.addChild(branch)
                     displaytree(branch,child)
-                except Exception as e:
-                    print(e)
+                except:
+                    self.outputError()
         displaytree(a,tree)
 
 def main():

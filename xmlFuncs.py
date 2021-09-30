@@ -212,38 +212,48 @@ class adcXML():
             elif thisRungNo == secondRungNo:
                 secondRungs.append(rung)
         frResultList = [] # temporary list to store all the {dict} items returned above
+
         for rung in firstRungs:
             frResultList.append(self.searchRLLelement(rung,None))
+        #for item in frResultList:
+        #    print("frResultList",self.unNestDict(item))
         # now create a dictionary where all of these individual search results will be combined into
         frResults = {}
+        i=0
         for result in frResultList:
+            i+=1
             for k,v in result.items():
+                i+=1
                 # in the end we want two separate dictionaries; one for the first seed rung and one for the second
                 # seed rung, and we want them to have identical keys so that we can compare the values. So we use a
                 # combination of Rung # and ladder column # to form a new key for the results dictionary (previously
                 # the key of the search result was its unique XML ID).
-                newKey = str(v["ladderRungNoDisp"]) + "_" + str(v["ladderColumnNoDisp"])
+                newKey = str(v["ladderRungNoDisp"]) + "_" + str(v["ladderColumnNoDisp"])+"_"+str(i)
                 frResults[newKey] = v
                 srResultList = []
         for rung in secondRungs:
             srResultList.append(self.searchRLLelement(rung,None))
         srResults = {}
+        i = 0
         for result in srResultList:
+            i+=1
             for k,v in result.items():
+                i+=1
                 if "." in v["ladderRungNoDisp"]:
                     # for the second seed rung dictionary we need to further modify the dictionry key, subtracting one
-                    # from the run number, so that the keys from dictionary 2 will match the keys from dictionary 1
+                    # from the rung number, so that the keys from dictionary 2 will match the keys from dictionary 1
                     modifiedRungNo = v["ladderRungNoDisp"].split(".")
                     modifiedRungNo[0] = str(int(modifiedRungNo[0])-1)
                     modifiedRungNo = modifiedRungNo[0] + "." + modifiedRungNo[1]
                 else:
                     modifiedRungNo = str(int(v["ladderRungNoDisp"])-1)
-                newKey = str(modifiedRungNo) + "_" + str(v["ladderColumnNoDisp"])
+                newKey = str(modifiedRungNo) + "_" + str(v["ladderColumnNoDisp"])+"_"+str(i)
                 srResults[newKey] = v
         #print("results:",self.unNestDict(srResults))
         #print(frResultList)
         try: # check first rung against 2nd rung and 2nd rung against first rung for inconsistencies
             for k,v in frResults.items():
+
                 if frResults[k]["ladderInstruction"] != srResults[k]["ladderInstruction"]:
                     raise KeyError(k)
                 apple = frResults[k]
@@ -292,6 +302,9 @@ class adcXML():
 
         rungs = file.findall("rungs")
         newFirstRungNo = int(newFirstRungNo)
+        #for item in newTags.items():
+        #    print(item)
+        #print(newTags.items())
         for newRungNo in range(newFirstRungNo,newFirstRungNo+howMany):
             for rung in rungs:
                 if rung.find("rungNumber").text == str(newRungNo):
@@ -405,9 +418,24 @@ class adcXML():
             newTag["BOW"]["bit"] = a3bit
             newTag["BOW"]["prevBit"] = a2bit
         for item in self.tagsRoot.iter("item"):
-            tag_name = item.find('tagName').text
-            if firstTag['tagName'] == tag_name:
-                found = True
+            # TODO: make this recognize the structure for UDS
+            #  ex: item/structureElements/item[0]/name
+            #      item/structureElements/item[0]/ID
+            #      item/structureElements/item[1]/name
+            #      item/structureElements/item[1]/ID
+            #      ...etc
+            #try:
+            #    tag_name = item.find('tagName').text
+            #except:
+            #    tag_name = item.find('./structureElements')
+            found = False
+            try:
+                tag_name = item.find('tagName').text
+                if firstTag['tagName'] == tag_name:
+                    found = True
+            except:
+                pass
+            if found == True:
                 id = item.find('./tagSystemId/sysId').text
                 cols = item.find('./initValue/cols').text
                 if "BOW" in firstTag:
@@ -437,6 +465,9 @@ class adcXML():
                     cols = int(item.find('./initValue/cols').text)
                     count = str(rows*cols)
                     item.find('./initValue/value/dataTabs/count').text = count
+
+
+
         return newTag
 
 
@@ -463,7 +494,16 @@ class adcXML():
     def incrementBasicTagID(self, lastKnownAddress, tagName):
         found = False
         for item in self.tagsRoot.iter("item"):
+            print(item.text,item.attrib)
+            # TODO: make this recognize the structure for UDS
+            #  ex: item/structureElements/item[0]/name
+            #      item/structureElements/item[0]/ID
+            #      item/structureElements/item[1]/name
+            #      item/structureElements/item[1]/ID
+            #      ...etc
+
             tag_name = item.find('tagName').text
+
             if tagName == tag_name:
                 found = True
                 id = item.find('./tagSystemId/sysId').text
