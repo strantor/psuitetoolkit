@@ -494,20 +494,23 @@ class adcXML():
     def incrementBasicTagID(self, lastKnownAddress, tagName):
         found = False
         for item in self.tagsRoot.iter("item"):
-            print(item.text,item.attrib)
+            #print(item.text,item.attrib)
             # TODO: make this recognize the structure for UDS
             #  ex: item/structureElements/item[0]/name
             #      item/structureElements/item[0]/ID
             #      item/structureElements/item[1]/name
             #      item/structureElements/item[1]/ID
             #      ...etc
-
-            tag_name = item.find('tagName').text
+            try:
+                tag_name = item.find('tagName').text
+            except:
+                tag_name = "not a simple tag"
 
             if tagName == tag_name:
                 found = True
                 id = item.find('./tagSystemId/sysId').text
                 ret = id
+                print(id)
         if found == False:
             letter,number = lastKnownAddress.split("-")
             if letter in ["DI","DO","MST"]:
@@ -518,7 +521,10 @@ class adcXML():
                 self.statusOutput("cannot create new hardware tags ("+newNum+") that don't exist")
             else:
                 for item in self.tagsRoot.iter("item"):
-                    id = item.find('./tagSystemId/sysId').text
+                    try:
+                        id = item.find('./tagSystemId/sysId').text
+                    except:
+                        id = "not a simple tag ID"
                     if id == lastKnownAddress:
                         newItem = copy.deepcopy(item)
                 nLast = 0

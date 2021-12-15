@@ -479,10 +479,14 @@ class openAdproFile():
 
 
 if __name__ == "__main__":
-    #myProject = openAdproFile("Z:\\G\\PSuite Project Python\\New folder (3)\\Conv1-4.2.zip")
-    searchfor = "Conveyor(7)"
-    replacewith = "Conveyor(1)"
-    pathToProject = "sample1.adpro"
+    #myProject = openAdproFile("Z:\\Frontier\\701 Port Crossing\\box line\\PLC programs\\PX Box 0.23.adpro")
+    #searchfor = "Conveyor(6)"
+    #replacewith = "Conveyor(11)"
+    #pathToProject = "sample1.adpro"
+    #pathToProject = "Z:\\Frontier\\701 Port Crossing\\box line\\PLC programs\\PX Box 0.31.adpro"
+    searchfor = "R2R(1)"
+    replacewith = "R2R(4)"
+    pathToProject = "Z:\\Frontier\\102 BCIP\\bag line 2\\plc programs\\BCIP_BL2_Main3.3.adpro"
     myProject = openAdproFile(pathToProject,searchfor,replacewith)
 
 
