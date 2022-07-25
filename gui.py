@@ -513,7 +513,7 @@ class importedGUI(QtWidgets.QMainWindow):#, myGUI):
 
 
     def printTree(self,s,whichWidget):#treeWidget_3
-
+        # s is an XLM tree
         #tree = et.fromstring(s)
         tree = s
         a=QTreeWidgetItem([tree.tag,tree.text,str(tree.attrib)])

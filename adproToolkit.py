@@ -484,9 +484,10 @@ if __name__ == "__main__":
     #replacewith = "Conveyor(11)"
     #pathToProject = "sample1.adpro"
     #pathToProject = "Z:\\Frontier\\701 Port Crossing\\box line\\PLC programs\\PX Box 0.31.adpro"
-    searchfor = "R2R(1)"
-    replacewith = "R2R(4)"
-    pathToProject = "Z:\\Frontier\\102 BCIP\\bag line 2\\plc programs\\BCIP_BL2_Main3.3.adpro"
+    searchfor = "TU"
+    replacewith = "PO"
+    #pathToProject = "Z:\\Frontier\\102 BCIP\\bag line 2\\plc programs\\BCIP_BL2_Main3.3.adpro"
+    pathToProject ="Z:\\personal\\strantor\\umbilicals intl\\dipping line\\mainplc0.9.adpro"
     myProject = openAdproFile(pathToProject,searchfor,replacewith)
 
 
